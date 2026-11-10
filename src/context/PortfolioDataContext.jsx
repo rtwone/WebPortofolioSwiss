@@ -488,6 +488,14 @@ export function PortfolioDataProvider({ children }) {
           ...baseLangDefaults.seo,
           ...(rawContent.seo || {}),
           ...(savedLangData.seo || {}),
+          metaTitle:
+            savedLangData.seo?.metaTitle ||
+            rawContent.seo?.metaTitle ||
+            baseLangDefaults.seo.metaTitle,
+          metaDescription:
+            savedLangData.seo?.metaDescription ||
+            rawContent.seo?.metaDescription ||
+            baseLangDefaults.seo.metaDescription,
           metaKeywords:
             rawContent.seo?.metaKeywords ??
             savedLangData.seo?.metaKeywords ??
