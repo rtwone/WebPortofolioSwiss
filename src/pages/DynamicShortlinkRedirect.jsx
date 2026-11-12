@@ -14,7 +14,7 @@ export default function DynamicShortlinkRedirect() {
     const cleanSlug = slug.toLowerCase().trim();
 
     // Reserved routes yang tidak boleh di-redirect sebagai shortlink
-    const reserved = ['admin', 'projects', 'kuesioner'];
+    const reserved = ['admin', 'projects'];
     if (reserved.includes(cleanSlug)) {
       return;
     }

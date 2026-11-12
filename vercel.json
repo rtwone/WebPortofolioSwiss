@@ -1,11 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/kuesioner",
-      "destination": "https://forms.gle/DjSMFttWzrQL2uEU9",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/(.*)",

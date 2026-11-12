@@ -13,7 +13,6 @@ import CommandPalette from './components/CommandPalette';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProjectsArchivePage from './pages/ProjectsArchivePage';
 import NotFoundPage from './pages/NotFoundPage';
-import KuesionerRedirect from './pages/KuesionerRedirect';
 import DynamicShortlinkRedirect from './pages/DynamicShortlinkRedirect';
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -96,7 +95,6 @@ export default function App() {
           <Routes>
             <Route path="/" element={<PublicPortfolioPage />} />
             <Route path="/projects" element={<ProjectsArchivePage />} />
-            <Route path="/kuesioner" element={<KuesionerRedirect />} />
             <Route path="/s/:slug" element={<DynamicShortlinkRedirect />} />
             <Route path="/:slug" element={<DynamicShortlinkRedirect />} />
             <Route
