@@ -31,6 +31,9 @@ import {
   AlertTriangle,
   EyeOff,
   Crop,
+  Link2,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 import {
   supabase,
@@ -88,8 +91,9 @@ const ADMIN_TABS = [
   },
   { id: 'skills', index: '05', label: 'Manage Skills', icon: Cpu },
   { id: 'contact', index: '06', label: 'Contact & Footer', icon: Globe },
-  { id: 'seo', index: '07', label: 'SEO & Social Share', icon: Eye },
-  { id: 'messages', index: '08', label: 'Inbox Messages', icon: Mail },
+  { id: 'shortlinks', index: '07', label: 'Shortlinks Manager', icon: Link2 },
+  { id: 'seo', index: '08', label: 'SEO & Social Share', icon: Eye },
+  { id: 'messages', index: '09', label: 'Inbox Messages', icon: Mail },
 ];
 
 const PROJECT_CATEGORIES = ['Development', 'Visual Design', 'Other'];
@@ -503,6 +507,17 @@ export default function AdminDashboard() {
     name: '',
     proficiency_level: 'Advanced',
   });
+
+  // Shortlink Form State (Create / Edit modal)
+  const [shortlinkModalOpen, setShortlinkModalOpen] = useState(false);
+  const [editingShortlink, setEditingShortlink] = useState(null);
+  const [shortlinkForm, setShortlinkForm] = useState({
+    slug: '',
+    target_url: '',
+    label: '',
+    is_active: true,
+  });
+  const [confirmDeleteShortlinkId, setConfirmDeleteShortlinkId] = useState(null);
 
   // Confirm delete message
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState(null);
@@ -1718,6 +1733,164 @@ export default function AdminDashboard() {
       showToast(`Skill "${name}" berhasil dihapus.`);
     } catch (err) {
       showToast(err?.message || 'Gagal menghapus skill', 'error');
+    }
+  };
+
+  // ==========================================================================
+  // SHORTLINK HANDLERS
+  // ==========================================================================
+  const openCreateShortlinkModal = () => {
+    setEditingShortlink(null);
+    setShortlinkForm({
+      slug: '',
+      target_url: '',
+      label: '',
+      is_active: true,
+    });
+    setShortlinkModalOpen(true);
+  };
+
+  const openEditShortlinkModal = (item) => {
+    setEditingShortlink(item);
+    setShortlinkForm({
+      slug: item.slug || '',
+      target_url: item.target_url || '',
+      label: item.label || '',
+      is_active: item.is_active !== false,
+    });
+    setShortlinkModalOpen(true);
+  };
+
+  const handleSaveShortlink = async (e) => {
+    e.preventDefault();
+    const rawSlug = shortlinkForm.slug.trim().toLowerCase().replace(/^\/+/, '');
+    const cleanSlug = rawSlug.replace(/[^a-z0-9-_]/g, '-').replace(/-+/g, '-');
+    const targetUrl = shortlinkForm.target_url.trim();
+
+    if (!cleanSlug) {
+      showToast('Slug shortlink tidak boleh kosong.', 'error');
+      return;
+    }
+    if (!targetUrl) {
+      showToast('Target URL wajib diisi.', 'error');
+      return;
+    }
+
+    const reserved = ['admin', 'projects'];
+    if (reserved.includes(cleanSlug)) {
+      showToast(`Slug "${cleanSlug}" adalah nama sistem yang dilindungi.`, 'error');
+      return;
+    }
+
+    try {
+      const currentList = Array.isArray(draftContent.shortlinks)
+        ? [...draftContent.shortlinks]
+        : [];
+
+      // Cek duplikasi slug
+      const isDuplicate = currentList.some(
+        (s) =>
+          (s.slug || '').toLowerCase() === cleanSlug &&
+          (!editingShortlink || s.id !== editingShortlink.id)
+      );
+      if (isDuplicate) {
+        showToast(`Shortlink dengan slug "/${cleanSlug}" sudah ada.`, 'error');
+        return;
+      }
+
+      let updatedList = [];
+      if (editingShortlink) {
+        updatedList = currentList.map((s) => {
+          if (s.id === editingShortlink.id) {
+            return {
+              ...s,
+              slug: cleanSlug,
+              target_url: targetUrl,
+              label: shortlinkForm.label.trim() || cleanSlug,
+              is_active: shortlinkForm.is_active,
+              updated_at: new Date().toISOString(),
+            };
+          }
+          return s;
+        });
+      } else {
+        const newEntry = {
+          id: `sl-${Date.now()}`,
+          slug: cleanSlug,
+          target_url: targetUrl,
+          label: shortlinkForm.label.trim() || cleanSlug,
+          clicks: 0,
+          is_active: shortlinkForm.is_active,
+          created_at: new Date().toISOString(),
+        };
+        updatedList = [newEntry, ...currentList];
+      }
+
+      setDraftContent((prev) => ({
+        ...prev,
+        shortlinks: updatedList,
+      }));
+
+      // Simpan langsung ke Supabase / local
+      await updateSiteContent({ shortlinks: updatedList }, language, {
+        autoTranslate: false,
+      });
+
+      showToast(
+        editingShortlink
+          ? `Shortlink "/${cleanSlug}" berhasil diperbarui!`
+          : `Shortlink "/${cleanSlug}" berhasil dibuat!`
+      );
+      setShortlinkModalOpen(false);
+      setEditingShortlink(null);
+    } catch (err) {
+      showToast(err?.message || 'Gagal menyimpan shortlink', 'error');
+    }
+  };
+
+  const handleToggleShortlinkActive = async (id, currentStatus) => {
+    try {
+      const currentList = Array.isArray(draftContent.shortlinks)
+        ? [...draftContent.shortlinks]
+        : [];
+      const updatedList = currentList.map((s) =>
+        s.id === id ? { ...s, is_active: !currentStatus } : s
+      );
+      setDraftContent((prev) => ({ ...prev, shortlinks: updatedList }));
+      await updateSiteContent({ shortlinks: updatedList }, language, {
+        autoTranslate: false,
+      });
+      showToast('Status shortlink diperbarui.');
+    } catch (err) {
+      showToast(err?.message || 'Gagal mengubah status', 'error');
+    }
+  };
+
+  const handleDeleteShortlink = async (id) => {
+    try {
+      const currentList = Array.isArray(draftContent.shortlinks)
+        ? [...draftContent.shortlinks]
+        : [];
+      const updatedList = currentList.filter((s) => s.id !== id);
+      setDraftContent((prev) => ({ ...prev, shortlinks: updatedList }));
+      await updateSiteContent({ shortlinks: updatedList }, language, {
+        autoTranslate: false,
+      });
+      setConfirmDeleteShortlinkId(null);
+      showToast('Shortlink berhasil dihapus.');
+    } catch (err) {
+      showToast(err?.message || 'Gagal menghapus shortlink', 'error');
+    }
+  };
+
+  const copyShortlinkUrl = (slug) => {
+    const origin = window.location.origin;
+    const fullUrl = `${origin}/${slug}`;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(fullUrl);
+      showToast(`Tautan disalin: ${fullUrl}`);
+    } else {
+      showToast(fullUrl);
     }
   };
 
@@ -3921,6 +4094,164 @@ export default function AdminDashboard() {
           )}
 
           {/* ================================================================
+              TAB: SHORTLINKS MANAGER (Shortlink Redirects)
+          ================================================================ */}
+          {activeTab === 'shortlinks' && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="border border-[#333333] bg-[#1f1f1f]">
+                <div className="p-4 sm:p-8 border-b border-[#333333] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="font-mono font-bold text-xs text-[#8c7355] uppercase tracking-wider">
+                      07 / DYNAMIC URL SHORTLINKS
+                    </span>
+                    <h2 className="font-display font-bold text-lg sm:text-3xl text-[#fcfbf9] mt-1">
+                      Shortlinks Manager
+                    </h2>
+                    <p className="text-xs text-[#8c857b] font-medium mt-1">
+                      Buat tautan pendek khusus (misal: <code>/kuesioner</code>, <code>/cv</code>, <code>/wa</code>) yang otomatis mengarahkan pengunjung ke URL tujuan.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openCreateShortlinkModal}
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-[#fcfbf9] text-[#181818] font-mono font-bold text-xs uppercase tracking-wider hover:bg-[#8c7355] hover:text-[#fcfbf9] transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create Shortlink</span>
+                  </button>
+                </div>
+
+                {(!draftContent.shortlinks || draftContent.shortlinks.length === 0) ? (
+                  <div className="p-8 sm:p-12 text-center">
+                    <Link2 className="w-8 h-8 text-[#8c7355] mx-auto mb-2 opacity-60" />
+                    <p className="font-mono text-xs text-[#d8d2c7]">Belum ada shortlink yang dibuat.</p>
+                    <button
+                      type="button"
+                      onClick={openCreateShortlinkModal}
+                      className="mt-4 px-4 py-2 bg-[#141414] border border-[#8c7355] text-[#fcfbf9] font-mono font-bold text-xs uppercase cursor-pointer hover:bg-[#8c7355] hover:text-[#181818]"
+                    >
+                      + Buat Shortlink Pertama
+                    </button>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[#333333]">
+                    {draftContent.shortlinks.map((s) => {
+                      const origin = window.location.origin;
+                      const fullShortUrl = `${origin}/${s.slug}`;
+
+                      return (
+                        <div
+                          key={s.id}
+                          className="p-4 sm:p-6 hover:bg-[#242424] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                        >
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`px-2 py-0.5 font-mono font-bold text-[10px] uppercase border ${
+                                  s.is_active !== false
+                                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-700'
+                                    : 'bg-neutral-800 text-neutral-400 border-neutral-700'
+                                }`}
+                              >
+                                {s.is_active !== false ? 'Active' : 'Disabled'}
+                              </span>
+                              <span className="font-sans font-bold text-base text-[#fcfbf9]">
+                                {s.label || s.slug}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                              <span className="font-mono font-bold text-xs text-[#8c7355]">
+                                /{s.slug}
+                              </span>
+                              <span className="text-[#555] text-xs">→</span>
+                              <a
+                                href={s.target_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-mono text-xs text-[#d8d2c7] hover:text-[#8c7355] truncate max-w-[280px] sm:max-w-md inline-flex items-center gap-1"
+                                title={s.target_url}
+                              >
+                                <span>{s.target_url}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                              </a>
+                            </div>
+
+                            <div className="flex items-center gap-3 text-[11px] font-mono text-[#8c857b] pt-1">
+                              <span>Total Klik: <strong className="text-[#fcfbf9]">{s.clicks || 0}</strong></span>
+                              {s.created_at && (
+                                <span>• Dibuat: {new Date(s.created_at).toLocaleDateString('id-ID')}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => copyShortlinkUrl(s.slug)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#141414] border border-[#444444] hover:border-[#8c7355] font-mono font-bold text-xs text-[#fcfbf9] cursor-pointer"
+                              title="Salin Tautan Lengkap"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-[#8c7355]" />
+                              <span>Copy Link</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleShortlinkActive(s.id, s.is_active !== false)}
+                              className="px-3 py-1.5 bg-[#141414] border border-[#444444] hover:border-[#fcfbf9] font-mono font-bold text-xs text-[#d8d2c7] cursor-pointer"
+                              title="Aktifkan atau Nonaktifkan Shortlink"
+                            >
+                              {s.is_active !== false ? 'Disable' : 'Enable'}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => openEditShortlinkModal(s)}
+                              className="p-2 bg-[#141414] border border-[#444444] hover:border-[#8c7355] text-[#8c7355] cursor-pointer"
+                              title="Edit Shortlink"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+
+                            {confirmDeleteShortlinkId === s.id ? (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteShortlink(s.id)}
+                                  className="px-3 py-1.5 bg-red-600 text-white font-mono font-bold text-xs uppercase cursor-pointer"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteShortlinkId(null)}
+                                  className="px-2 py-1.5 bg-[#333333] text-[#fcfbf9] font-mono font-bold text-xs uppercase cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteShortlinkId(s.id)}
+                                className="p-2 bg-red-950/60 border border-red-800 hover:bg-red-800 text-red-200 cursor-pointer"
+                                title="Hapus Shortlink"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================
               TAB 7: SEO, SOCIAL SHARE (OPENGRAPH) & META TAGS
           ================================================================ */}
           {activeTab === 'seo' && (
@@ -5317,6 +5648,151 @@ export default function AdminDashboard() {
           >
             <CheckCircle2 className="w-5 h-5 text-[#16a34a] shrink-0" />
             <span className="font-mono font-bold text-xs">{toast.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal: Create / Update Shortlink */}
+      <AnimatePresence>
+        {shortlinkModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.96, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.96, y: 16 }}
+              className="w-full max-w-lg border border-[#8c7355] bg-[#1f1f1f] text-[#fcfbf9] p-4 sm:p-7 shadow-2xl"
+            >
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#333333]">
+                <div>
+                  <span className="font-mono font-bold text-[10px] text-[#8c7355] uppercase tracking-wider block">
+                    {editingShortlink ? 'EDIT SHORTLINK' : 'CREATE NEW SHORTLINK'}
+                  </span>
+                  <h3 className="font-display font-bold text-lg sm:text-xl text-[#fcfbf9]">
+                    {editingShortlink ? 'Edit Tautan Pendek' : 'Buat Tautan Pendek Baru'}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShortlinkModalOpen(false);
+                    setEditingShortlink(null);
+                  }}
+                  className="p-1.5 border border-[#3a3835] text-[#d8d2c7] hover:text-[#fcfbf9] cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveShortlink} className="space-y-4">
+                <div>
+                  <label className="block font-mono font-bold text-[10px] sm:text-xs text-[#d8d2c7] uppercase mb-1">
+                    Label / Nama Pengenal *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={shortlinkForm.label}
+                    onChange={(e) =>
+                      setShortlinkForm((prev) => ({ ...prev, label: e.target.value }))
+                    }
+                    placeholder="e.g. Kuesioner Skripsi / CV PDF / Chat WhatsApp"
+                    className="w-full px-3 py-2 bg-[#141414] border border-[#3a3835] focus:border-[#8c7355] font-sans font-semibold text-sm text-[#fcfbf9] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-mono font-bold text-[10px] sm:text-xs text-[#d8d2c7] uppercase mb-1">
+                    Slug / Path URL *
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-3 py-2 bg-[#141414] border-y border-l border-[#3a3835] font-mono text-xs text-[#8c7355] select-none">
+                      irfanhariyanto.my.id/
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={shortlinkForm.slug}
+                      onChange={(e) =>
+                        setShortlinkForm((prev) => ({
+                          ...prev,
+                          slug: e.target.value
+                            .toLowerCase()
+                            .replace(/\s+/g, '-')
+                            .replace(/[^a-z0-9-_]/g, ''),
+                        }))
+                      }
+                      placeholder="kuesioner"
+                      className="flex-1 px-3 py-2 bg-[#141414] border border-[#3a3835] focus:border-[#8c7355] font-mono font-bold text-sm text-[#fcfbf9] outline-none"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-[#8c857b] mt-1 block">
+                    Gunakan huruf kecil, angka, dan tanda hubung (-). Contoh: <code>kuesioner</code>, <code>cv</code>, <code>wa</code>
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block font-mono font-bold text-[10px] sm:text-xs text-[#d8d2c7] uppercase mb-1">
+                    Target Destination URL (URL Tujuan) *
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={shortlinkForm.target_url}
+                    onChange={(e) =>
+                      setShortlinkForm((prev) => ({
+                        ...prev,
+                        target_url: e.target.value,
+                      }))
+                    }
+                    placeholder="https://forms.gle/DjSMFttWzrQL2uEU9"
+                    className="w-full px-3 py-2 bg-[#141414] border border-[#3a3835] focus:border-[#8c7355] font-mono font-semibold text-xs text-[#fcfbf9] outline-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={shortlinkForm.is_active}
+                      onChange={(e) =>
+                        setShortlinkForm((prev) => ({
+                          ...prev,
+                          is_active: e.target.checked,
+                        }))
+                      }
+                      className="accent-[#8c7355] w-4 h-4"
+                    />
+                    <span className="font-mono text-xs text-[#d8d2c7]">
+                      Status Aktif (Bisa diakses publik)
+                    </span>
+                  </label>
+                </div>
+
+                <div className="pt-4 border-t border-[#333333] flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShortlinkModalOpen(false);
+                      setEditingShortlink(null);
+                    }}
+                    className="px-4 py-2 bg-[#141414] border border-[#444444] font-mono font-bold text-xs uppercase text-[#d8d2c7] cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-[#fcfbf9] text-[#181818] hover:bg-[#8c7355] hover:text-[#fcfbf9] font-mono font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  >
+                    {editingShortlink ? 'Simpan Perubahan' : 'Buat Shortlink'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

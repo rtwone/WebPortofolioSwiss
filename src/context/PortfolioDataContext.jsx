@@ -87,6 +87,9 @@ function loadObjectFromStorage(key, fallback) {
         contact: mergedContact,
         footer: { ...fallback.footer, ...(parsed.footer || {}) },
         seo: { ...fallback.seo, ...(parsed.seo || {}) },
+        shortlinks: Array.isArray(parsed.shortlinks)
+          ? parsed.shortlinks
+          : (fallback.shortlinks || []),
         id_locale: {
           ...BILINGUAL_SITE_DEFAULTS.id,
           ...(parsed.id_locale || {}),
@@ -484,6 +487,9 @@ export function PortfolioDataProvider({ children }) {
           ...baseLangDefaults.footer,
           ...(savedLangData.footer || {}),
         },
+        shortlinks: Array.isArray(rawContent.shortlinks)
+          ? rawContent.shortlinks
+          : [],
         seo: {
           ...baseLangDefaults.seo,
           ...(rawContent.seo || {}),
@@ -1513,6 +1519,43 @@ export function PortfolioDataProvider({ children }) {
 
   const t = UI_DICTIONARY[language] || UI_DICTIONARY.id;
 
+  // Helper to record shortlink hit clicks in siteContent
+  const recordShortlinkClick = useCallback(
+    async (shortlinkIdOrSlug) => {
+      setSiteContent((prev) => {
+        const list = Array.isArray(prev?.shortlinks) ? prev.shortlinks : [];
+        let updated = false;
+        const nextList = list.map((item) => {
+          if (
+            item.id === shortlinkIdOrSlug ||
+            (item.slug || '').toLowerCase() === String(shortlinkIdOrSlug).toLowerCase()
+          ) {
+            updated = true;
+            return { ...item, clicks: (item.clicks || 0) + 1 };
+          }
+          return item;
+        });
+        if (!updated) return prev;
+        const nextContent = { ...prev, shortlinks: nextList };
+        saveToStorage(STORAGE_KEYS.siteContent, nextContent);
+
+        // Async sync to Supabase without blocking UI
+        if (isSupabaseConfigured && supabase) {
+          supabase
+            .from('site_settings')
+            .update({
+              content: nextContent,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', 'main')
+            .then();
+        }
+        return nextContent;
+      });
+    },
+    []
+  );
+
   return (
     <PortfolioDataContext.Provider
       value={{
@@ -1528,6 +1571,7 @@ export function PortfolioDataProvider({ children }) {
         siteContent: activeSiteContent,
         rawSiteContent: siteContent,
         buildLocalizedSiteContent,
+        recordShortlinkClick,
         projects: localizedProjects,
         rawProjects: projects,
         experiences: localizedExperiences,
