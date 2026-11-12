@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePortfolioData } from '../context/PortfolioDataContext';
 import { ExternalLink, AlertTriangle, ArrowLeft } from 'lucide-react';
@@ -7,6 +7,7 @@ export default function DynamicShortlinkRedirect() {
   const { slug } = useParams();
   const { siteContent, recordShortlinkClick } = usePortfolioData();
   const [notFound, setNotFound] = useState(false);
+  const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -27,22 +28,27 @@ export default function DynamicShortlinkRedirect() {
     );
 
     if (matched && matched.target_url) {
+      if (hasTriggeredRef.current) return;
+      hasTriggeredRef.current = true;
+
       let target = matched.target_url.trim();
       if (!/^https?:\/\//i.test(target)) {
         target = `https://${target}`;
       }
 
-      // Catat hit klik jika handler tersedia
+      // Catat hit klik tepat 1 kali saja
       if (typeof recordShortlinkClick === 'function') {
         recordShortlinkClick(matched.id || cleanSlug);
       }
 
-      // Redirect seketika
+      // Redirect ke target URL
       window.location.replace(target);
     } else {
       // Tunggu sebentar untuk memastikan data selesai termuat dari Supabase/storage
       const timer = setTimeout(() => {
-        setNotFound(true);
+        if (!hasTriggeredRef.current) {
+          setNotFound(true);
+        }
       }, 700);
       return () => clearTimeout(timer);
     }

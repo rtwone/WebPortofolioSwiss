@@ -1522,6 +1522,8 @@ export function PortfolioDataProvider({ children }) {
   // Helper to record shortlink hit clicks in siteContent
   const recordShortlinkClick = useCallback(
     async (shortlinkIdOrSlug) => {
+      // 1. Update State & LocalStorage
+      let nextContentToSave = null;
       setSiteContent((prev) => {
         const list = Array.isArray(prev?.shortlinks) ? prev.shortlinks : [];
         let updated = false;
@@ -1537,21 +1539,45 @@ export function PortfolioDataProvider({ children }) {
         });
         if (!updated) return prev;
         const nextContent = { ...prev, shortlinks: nextList };
+        nextContentToSave = nextContent;
         saveToStorage(STORAGE_KEYS.siteContent, nextContent);
-
-        // Async sync to Supabase without blocking UI
-        if (isSupabaseConfigured && supabase) {
-          supabase
-            .from('site_settings')
-            .update({
-              content: nextContent,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', 'main')
-            .then();
-        }
         return nextContent;
       });
+
+      // 2. Fetch fresh snapshot from Supabase and increment accurately
+      if (isSupabaseConfigured && supabase) {
+        try {
+          const { data } = await supabase
+            .from('site_settings')
+            .select('content')
+            .eq('id', 'main')
+            .maybeSingle();
+
+          if (data?.content) {
+            const dbList = Array.isArray(data.content.shortlinks)
+              ? data.content.shortlinks
+              : [];
+            const updatedDbList = dbList.map((item) => {
+              if (
+                item.id === shortlinkIdOrSlug ||
+                (item.slug || '').toLowerCase() === String(shortlinkIdOrSlug).toLowerCase()
+              ) {
+                return { ...item, clicks: (item.clicks || 0) + 1 };
+              }
+              return item;
+            });
+            await supabase
+              .from('site_settings')
+              .update({
+                content: { ...data.content, shortlinks: updatedDbList },
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', 'main');
+          }
+        } catch {
+          // ignore
+        }
+      }
     },
     []
   );
