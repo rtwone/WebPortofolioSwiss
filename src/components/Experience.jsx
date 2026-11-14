@@ -244,17 +244,17 @@ export default function Experience() {
             transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
             className="lg:col-span-6 min-w-0"
           >
-            <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-[#181818] text-[#fcfbf9] flex flex-wrap items-center justify-between gap-2">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-[#181818] text-[#fcfbf9] border-t-4 border-t-[#2563eb] flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <Briefcase
-                  className="w-4 h-4 text-[#8c7355] shrink-0"
+                  className="w-4 h-4 text-[#2563eb] shrink-0"
                   aria-hidden="true"
                 />
                 <span className="font-mono font-bold text-xs sm:text-sm uppercase tracking-wider truncate">
                   {t.experience.workHeader}
                 </span>
               </div>
-              <span className="font-mono font-bold text-xs text-[#d8d2c7] shrink-0">
+              <span className="font-mono font-bold text-xs text-[#2563eb] bg-[#2563eb]/20 px-2 py-0.5 rounded shrink-0">
                 {String(workExperiences.length).padStart(2, '0')}{' '}
                 {t.experience.recordsSuffix}
               </span>
@@ -421,17 +421,17 @@ export default function Experience() {
             className="lg:col-span-6 space-y-6 min-w-0"
           >
             <div>
-              <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-[#181818] text-[#fcfbf9] flex flex-wrap items-center justify-between gap-2">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-[#181818] text-[#fcfbf9] border-t-4 border-t-[#dc2626] flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <GraduationCap
-                    className="w-4 h-4 text-[#8c7355] shrink-0"
+                    className="w-4 h-4 text-[#dc2626] shrink-0"
                     aria-hidden="true"
                   />
                   <span className="font-mono font-bold text-xs sm:text-sm uppercase tracking-wider truncate">
                     {t.experience.eduHeader}
                   </span>
                 </div>
-                <span className="font-mono font-bold text-xs text-[#d8d2c7] shrink-0">
+                <span className="font-mono font-bold text-xs text-[#dc2626] bg-[#dc2626]/20 px-2 py-0.5 rounded shrink-0">
                   {t.experience.higherEd}
                 </span>
               </div>
@@ -585,17 +585,17 @@ export default function Experience() {
             </div>
 
             {/* Core Competencies & Focus Areas */}
-            <div className="border border-[#d8d2c7] bg-[#fcfbf9] p-4 sm:p-8">
+            <div className="border border-[#d8d2c7] border-t-4 border-t-[#059669] bg-[#fcfbf9] p-4 sm:p-8">
               <div className="pb-4 mb-4 sm:mb-5 border-b border-[#d8d2c7] flex items-center justify-between">
                 <div>
-                  <span className="font-mono font-bold text-xs text-[#8c7355] uppercase tracking-wider block">
+                  <span className="font-mono font-bold text-xs text-[#059669] uppercase tracking-wider block">
                     {t.experience.coreCompLabel}
                   </span>
                   <h4 className="font-display font-bold text-lg sm:text-xl text-[#181818] mt-1 leading-snug">
                     {t.experience.coreCompTitle}
                   </h4>
                 </div>
-                <span className="font-mono font-bold text-xs text-[#5c5852]">
+                <span className="font-mono font-bold text-xs text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded">
                   {t.experience.pillarsCount}
                 </span>
               </div>
@@ -604,19 +604,27 @@ export default function Experience() {
                 {competencies.map((comp, idx) => {
                   const IconComponent =
                     comp.icon || PILLAR_ICONS[idx % PILLAR_ICONS.length];
+                  const compThemes = [
+                    { border: 'border-l-4 border-l-[#2563eb]', tag: 'text-[#2563eb]', iconBg: 'bg-[#2563eb]/10 text-[#2563eb]' },
+                    { border: 'border-l-4 border-l-[#059669]', tag: 'text-[#059669]', iconBg: 'bg-[#059669]/10 text-[#059669]' },
+                    { border: 'border-l-4 border-l-[#7c3aed]', tag: 'text-[#7c3aed]', iconBg: 'bg-[#7c3aed]/10 text-[#7c3aed]' },
+                  ];
+                  const cTheme = compThemes[idx % compThemes.length];
                   return (
                     <div
                       key={comp.code || idx}
-                      className="p-3.5 sm:p-4 bg-[#f7f5f0] border border-[#d8d2c7] hover:border-[#181818] transition-colors"
+                      className={`p-3.5 sm:p-4 bg-[#f7f5f0] border border-[#d8d2c7] ${cTheme.border} hover:border-[#181818] hover:shadow-sm transition-all`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-mono font-bold text-xs tracking-wider text-[#8c7355]">
+                        <span className={`font-mono font-bold text-xs tracking-wider ${cTheme.tag}`}>
                           {comp.code}
                         </span>
-                        <IconComponent
-                          className="w-4 h-4 text-[#181818]"
-                          aria-hidden="true"
-                        />
+                        <div className={`p-1 rounded ${cTheme.iconBg}`}>
+                          <IconComponent
+                            className="w-3.5 h-3.5"
+                            aria-hidden="true"
+                          />
+                        </div>
                       </div>
                       <div className="font-sans font-bold text-sm sm:text-base text-[#181818]">
                         {comp.title}

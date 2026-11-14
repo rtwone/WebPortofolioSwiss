@@ -266,13 +266,13 @@ export default function Contact() {
               </p>
 
               {/* Interactive Copy Email Box */}
-              <div className="mt-6 p-4 bg-[#f7f5f0] border border-[#181818]">
+              <div className="mt-6 p-4 bg-[#f7f5f0] border border-[#d8d2c7] border-l-4 border-l-[#2563eb]">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-mono font-bold text-[11px] text-[#5c5852] uppercase tracking-wider">
+                  <span className="font-mono font-bold text-[11px] text-[#2563eb] uppercase tracking-wider">
                     {t.contact.directEmailLabel}
                   </span>
                   <span className="inline-flex items-center gap-1.5 font-mono font-bold text-[11px] text-[#16a34a]">
-                    <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
+                    <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
                     {t.contact.activeInbox}
                   </span>
                 </div>
@@ -287,7 +287,7 @@ export default function Contact() {
                   className={`mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 font-mono font-bold text-xs uppercase tracking-wider border transition-colors duration-200 cursor-pointer ${
                     copied
                       ? 'bg-[#16a34a] text-[#fcfbf9] border-[#16a34a]'
-                      : 'bg-[#181818] text-[#fcfbf9] border-[#181818] hover:bg-[#8c7355] hover:border-[#8c7355]'
+                      : 'bg-[#181818] text-[#fcfbf9] border-[#181818] hover:bg-[#2563eb] hover:border-[#2563eb]'
                   }`}
                 >
                   {copied ? (
@@ -353,10 +353,10 @@ export default function Contact() {
             transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
             className="lg:col-span-7 min-w-0"
           >
-            <div className="p-4 sm:p-8 lg:p-10 border border-[#d8d2c7] bg-[#fcfbf9]">
+            <div className="p-4 sm:p-8 lg:p-10 border border-[#d8d2c7] border-t-4 border-t-[#dc2626] bg-[#fcfbf9] shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 sm:mb-6 border-b border-[#d8d2c7]">
                 <div>
-                  <span className="font-mono font-bold text-xs text-[#8c7355] uppercase tracking-wider block">
+                  <span className="font-mono font-bold text-xs text-[#dc2626] uppercase tracking-wider block">
                     {t.contact.formSubtitle}
                   </span>
                   <h3 className="font-display font-bold text-lg sm:text-xl md:text-2xl text-[#181818] mt-1 leading-snug">
@@ -467,7 +467,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#181818] text-[#fcfbf9] font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#8c7355] disabled:opacity-60 transition-colors duration-200 cursor-pointer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#181818] text-[#fcfbf9] font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#dc2626] disabled:opacity-60 transition-colors duration-200 cursor-pointer"
                   >
                     <Send className="w-4 h-4 shrink-0" aria-hidden="true" />
                     <span>

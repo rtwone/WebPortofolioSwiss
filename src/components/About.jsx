@@ -12,6 +12,13 @@ import { usePortfolioData } from '../context/PortfolioDataContext';
 
 const METRIC_ICONS = [Layers, Code2, Terminal, Sparkles];
 
+const METRIC_THEMES = [
+  { border: 'border-t-2 border-t-[#2563eb]', iconBg: 'bg-[#2563eb]/10 text-[#2563eb]', tag: 'text-[#2563eb]' },
+  { border: 'border-t-2 border-t-[#dc2626]', iconBg: 'bg-[#dc2626]/10 text-[#dc2626]', tag: 'text-[#dc2626]' },
+  { border: 'border-t-2 border-t-[#059669]', iconBg: 'bg-[#059669]/10 text-[#059669]', tag: 'text-[#059669]' },
+  { border: 'border-t-2 border-t-[#d97706]', iconBg: 'bg-[#d97706]/10 text-[#d97706]', tag: 'text-[#d97706]' },
+];
+
 export default function About() {
   const { siteContent, t } = usePortfolioData();
   const about = siteContent?.about || {};
@@ -132,19 +139,22 @@ export default function About() {
           >
             {metrics.map((metric, idx) => {
               const IconComponent = METRIC_ICONS[idx % METRIC_ICONS.length];
+              const theme = METRIC_THEMES[idx % METRIC_THEMES.length];
               return (
                 <div
                   key={metric.index || idx}
-                  className="border border-[#d8d2c7] bg-[#fcfbf9] p-5 sm:p-6 hover:border-[#181818] transition-colors duration-200"
+                  className={`border border-[#d8d2c7] ${theme.border} bg-[#fcfbf9] p-5 sm:p-6 hover:shadow-sm transition-all duration-200`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono font-bold text-xs sm:text-sm tracking-wider text-[#8c7355]">
+                    <span className={`font-mono font-bold text-xs sm:text-sm tracking-wider ${theme.tag}`}>
                       {t.about.indexPrefix} {metric.index}
                     </span>
-                    <IconComponent
-                      className="w-4 h-4 text-[#181818]"
-                      aria-hidden="true"
-                    />
+                    <div className={`p-1.5 rounded ${theme.iconBg}`}>
+                      <IconComponent
+                        className="w-4 h-4"
+                        aria-hidden="true"
+                      />
+                    </div>
                   </div>
 
                   <div className="font-display font-extrabold text-2xl sm:text-3xl md:text-4xl text-[#181818] tracking-tight leading-tight">

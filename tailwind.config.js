@@ -15,6 +15,12 @@ export default {
         bronze: '#8c7355',
         statusGreen: '#16a34a',
         hairline: '#d8d2c7',
+        // Swiss Graphic Accent Palette
+        swissRed: '#dc2626',
+        swissCobalt: '#2563eb',
+        swissAmber: '#d97706',
+        swissEmerald: '#059669',
+        swissViolet: '#7c3aed',
       },
       fontFamily: {
         display: ['"Playfair Display"', 'Georgia', 'serif'],

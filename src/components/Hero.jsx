@@ -17,6 +17,13 @@ export default function Hero() {
   const hero = siteContent?.hero || {};
   const disciplines = Array.isArray(hero.disciplines) ? hero.disciplines : [];
 
+  const disciplineThemes = [
+    { border: 'border-l-4 border-l-[#2563eb]', iconBg: 'bg-[#2563eb]/10 text-[#2563eb]', badge: 'text-[#2563eb]' },
+    { border: 'border-l-4 border-l-[#dc2626]', iconBg: 'bg-[#dc2626]/10 text-[#dc2626]', badge: 'text-[#dc2626]' },
+    { border: 'border-l-4 border-l-[#059669]', iconBg: 'bg-[#059669]/10 text-[#059669]', badge: 'text-[#059669]' },
+    { border: 'border-l-4 border-l-[#7c3aed]', iconBg: 'bg-[#7c3aed]/10 text-[#7c3aed]', badge: 'text-[#7c3aed]' },
+  ];
+
   // Parse daftar roles/titles dari hero.subtitle (bisa dipisah tanda koma `,` atau garis tegak `|`)
   const rolesList = useMemo(() => {
     const raw = hero.subtitle || 'Software Engineer & Visual Designer';
@@ -104,8 +111,8 @@ export default function Hero() {
               className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end"
             >
               <div className="lg:col-span-9 min-w-0">
-                <div className="inline-flex flex-wrap items-center gap-2 px-3 py-1.5 mb-4 sm:mb-5 bg-[#fcfbf9] border border-[#d8d2c7] max-w-full">
-                  <span className="font-mono font-bold text-xs sm:text-sm tracking-wider text-[#8c7355]">
+                <div className="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 mb-4 sm:mb-5 bg-[#fcfbf9] border border-[#d8d2c7] border-l-4 border-l-[#dc2626] shadow-sm max-w-full">
+                  <span className="font-mono font-bold text-xs sm:text-sm tracking-wider text-[#dc2626]">
                     {hero.editionBadge || 'EDITION // 2025'}
                   </span>
                   <span className="hidden xs:inline text-[#d8d2c7]" aria-hidden="true">
@@ -140,9 +147,10 @@ export default function Hero() {
 
               {/* Right Column Technical Stamp on Desktop */}
               <div className="lg:col-span-3 lg:border-l lg:border-[#d8d2c7] lg:pl-6 flex flex-col justify-end">
-                <div className="p-4 bg-[#fcfbf9] border border-[#d8d2c7]">
-                  <div className="font-mono font-bold text-[11px] text-[#5c5852] uppercase tracking-wider">
-                    {hero.stampLabel || 'DISCIPLINARY MATRIX'}
+                <div className="p-4 bg-[#fcfbf9] border border-[#d8d2c7] border-t-2 border-t-[#2563eb] shadow-sm">
+                  <div className="font-mono font-bold text-[11px] text-[#2563eb] uppercase tracking-wider flex items-center justify-between">
+                    <span>{hero.stampLabel || 'DISCIPLINARY MATRIX'}</span>
+                    <span className="w-2 h-2 rounded-full bg-[#2563eb]" />
                   </div>
                   <div className="mt-1 font-mono font-bold text-sm text-[#181818]">
                     {hero.stampTitle || 'LOGIC × TYPOGRAPHY'}
@@ -178,16 +186,19 @@ export default function Hero() {
               <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-[#d8d2c7] grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {disciplines.map((item, idx) => {
                   const IconComponent = PILL_ICONS[idx % PILL_ICONS.length];
+                  const theme = disciplineThemes[idx % disciplineThemes.length];
                   return (
                     <div
                       key={item.code || idx}
-                      className="flex items-center gap-2.5 px-3 py-2.5 bg-[#fcfbf9] border border-[#d8d2c7] min-w-0"
+                      className={`flex items-center gap-2.5 px-3 py-2.5 bg-[#fcfbf9] border border-[#d8d2c7] ${theme.border} hover:shadow-sm transition-all min-w-0`}
                     >
-                      <IconComponent
-                        className="w-4 h-4 text-[#8c7355] shrink-0"
-                        aria-hidden="true"
-                      />
-                      <span className="font-mono font-bold text-[11px] sm:text-xs tracking-wider text-[#5c5852] shrink-0">
+                      <div className={`p-1 rounded ${theme.iconBg} shrink-0`}>
+                        <IconComponent
+                          className="w-3.5 h-3.5"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <span className={`font-mono font-bold text-[11px] sm:text-xs tracking-wider ${theme.badge} shrink-0`}>
                         {item.code}
                       </span>
                       <span className="font-sans font-semibold text-xs sm:text-[13px] text-[#181818] leading-tight break-words">

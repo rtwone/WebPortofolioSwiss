@@ -10,6 +10,11 @@ const CATEGORY_METADATA = {
     description:
       'Perangkat lunak industri kreatif untuk identitas visual, grafis editorial, ilustrasi vektor, dan multimedia.',
     icon: Palette,
+    accent: '#dc2626',
+    borderTop: 'border-t-4 border-t-[#dc2626]',
+    codeColor: 'text-[#dc2626]',
+    iconBox: 'border-[#dc2626] bg-[#dc2626]/10 text-[#dc2626]',
+    pillHover: 'hover:bg-[#dc2626] hover:text-white hover:border-[#dc2626]',
   },
   'Engineering & Computing': {
     index: '02',
@@ -17,6 +22,11 @@ const CATEGORY_METADATA = {
     description:
       'Bahasa pemrograman, runtime server, dan pengelolaan basis data untuk fondasi logika komputasi.',
     icon: Terminal,
+    accent: '#2563eb',
+    borderTop: 'border-t-4 border-t-[#2563eb]',
+    codeColor: 'text-[#2563eb]',
+    iconBox: 'border-[#2563eb] bg-[#2563eb]/10 text-[#2563eb]',
+    pillHover: 'hover:bg-[#2563eb] hover:text-white hover:border-[#2563eb]',
   },
   'Ecosystem & Productivity': {
     index: '03',
@@ -24,6 +34,11 @@ const CATEGORY_METADATA = {
     description:
       'Alat kontrol versi, kolaborasi repositori, code editor, dan akselerasi kecerdasan buatan (AI).',
     icon: Sparkles,
+    accent: '#059669',
+    borderTop: 'border-t-4 border-t-[#059669]',
+    codeColor: 'text-[#059669]',
+    iconBox: 'border-[#059669] bg-[#059669]/10 text-[#059669]',
+    pillHover: 'hover:bg-[#059669] hover:text-white hover:border-[#059669]',
   },
 };
 
@@ -129,17 +144,17 @@ export default function Skills() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1, ease: 'easeOut' }}
-                className="border border-[#d8d2c7] bg-[#fcfbf9] hover:border-[#181818] transition-colors duration-200 flex flex-col justify-between min-w-0"
+                className={`border border-[#d8d2c7] ${category.borderTop || 'border-t-4 border-t-[#181818]'} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-md transition-all duration-200 flex flex-col justify-between min-w-0`}
               >
                 {/* Top Card Header & Description */}
                 <div className="p-4 sm:p-8">
                   <div className="flex items-center justify-between pb-4 mb-4 sm:mb-5 border-b border-[#d8d2c7]">
-                    <span className="font-mono font-bold text-xs sm:text-sm text-[#8c7355] tracking-wider">
+                    <span className={`font-mono font-bold text-xs sm:text-sm tracking-wider ${category.codeColor || 'text-[#8c7355]'}`}>
                       {category.code}
                     </span>
-                    <div className="w-9 h-9 border border-[#181818] bg-[#f7f5f0] flex items-center justify-center">
+                    <div className={`w-9 h-9 border flex items-center justify-center ${category.iconBox || 'border-[#181818] bg-[#f7f5f0] text-[#181818]'}`}>
                       <IconComponent
-                        className="w-4 h-4 text-[#181818]"
+                        className="w-4 h-4"
                         aria-hidden="true"
                       />
                     </div>
@@ -166,7 +181,7 @@ export default function Skills() {
                         <span
                           key={skill.id || skill.name}
                           title={`Proficiency: ${skill.proficiency_level || 'Advanced'}`}
-                          className="inline-flex items-center px-3 py-1.5 font-mono font-bold text-xs text-[#181818] bg-[#f7f5f0] border border-[#181818] hover:bg-[#181818] hover:text-[#fcfbf9] transition-colors duration-150 cursor-default"
+                          className={`inline-flex items-center px-3 py-1.5 font-mono font-bold text-xs text-[#181818] bg-[#f7f5f0] border border-[#181818] ${category.pillHover || 'hover:bg-[#181818] hover:text-[#fcfbf9]'} transition-colors duration-150 cursor-default`}
                         >
                           {skill.name}
                         </span>

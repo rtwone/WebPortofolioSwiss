@@ -12,7 +12,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
-import { ProjectPhotoFrame } from '../components/Projects';
+import { ProjectPhotoFrame, CATEGORY_COLORS } from '../components/Projects';
 import Footer from '../components/Footer';
 
 const BASE_CATEGORIES = ['All', 'Development', 'Visual Design', 'Other'];
@@ -169,15 +169,16 @@ export default function ProjectsArchivePage() {
                   const isActive = selectedCategory === category;
                   const displayCat =
                     t.projects.categoryLabels?.[category] || category;
+                  const catTheme = CATEGORY_COLORS[category] || CATEGORY_COLORS.All;
                   return (
                     <button
                       key={category}
                       type="button"
                       onClick={() => setSelectedCategory(category)}
                       aria-pressed={isActive}
-                      className={`px-4 py-2.5 font-mono font-bold text-xs uppercase tracking-wider border transition-colors duration-200 cursor-pointer ${
+                      className={`px-4 py-2.5 font-mono font-bold text-xs uppercase tracking-wider border transition-all duration-200 cursor-pointer ${
                         isActive
-                          ? 'bg-[#181818] text-[#fcfbf9] border-[#181818]'
+                          ? catTheme.activeBtn
                           : 'bg-[#fcfbf9] text-[#181818] border-[#d8d2c7] hover:border-[#181818]'
                       }`}
                     >
@@ -256,6 +257,8 @@ export default function ProjectsArchivePage() {
                         .map((s) => s.trim())
                         .filter(Boolean);
 
+                  const catTheme = CATEGORY_COLORS[project.category] || CATEGORY_COLORS.Other;
+
                   return (
                     <motion.article
                       layout
@@ -264,19 +267,19 @@ export default function ProjectsArchivePage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.35, ease: 'easeOut' }}
-                  className="border border-[#d8d2c7] bg-[#fcfbf9] hover:border-[#181818] transition-colors duration-200 flex flex-col justify-between min-w-0"
-                >
-                  <div>
-                    <div className="px-4 sm:px-8 py-4 bg-[#f7f5f0] border-b border-[#d8d2c7] flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="inline-flex items-center justify-center px-2.5 py-1 bg-[#181818] text-[#fcfbf9] font-mono font-bold text-xs shrink-0">
-                          {indexLabel}
-                        </span>
-                        <span className="font-mono font-bold text-xs text-[#8c7355] uppercase tracking-wider truncate">
-                          {t.projects.categoryLabels?.[project.category] ||
-                            project.category}
-                        </span>
-                      </div>
+                      className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-md transition-all duration-200 flex flex-col justify-between min-w-0`}
+                    >
+                      <div>
+                        <div className="px-4 sm:px-8 py-4 bg-[#f7f5f0] border-b border-[#d8d2c7] flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="inline-flex items-center justify-center px-2.5 py-1 bg-[#181818] text-[#fcfbf9] font-mono font-bold text-xs shrink-0">
+                              {indexLabel}
+                            </span>
+                            <span className={`inline-flex items-center px-2 py-0.5 border font-mono font-bold text-xs uppercase tracking-wider truncate ${catTheme.badgeBg}`}>
+                              {t.projects.categoryLabels?.[project.category] ||
+                                project.category}
+                            </span>
+                          </div>
 
                       <span className="font-mono font-bold text-xs text-[#5c5852] shrink-0">
                         {project.year}
@@ -312,7 +315,7 @@ export default function ProjectsArchivePage() {
                           {techList.map((tech) => (
                             <span
                               key={tech}
-                              className="px-2.5 py-1 bg-[#f7f5f0] border border-[#d8d2c7] font-mono font-bold text-xs text-[#181818]"
+                              className={`px-2.5 py-1 bg-[#f7f5f0] border border-[#d8d2c7] font-mono font-bold text-xs text-[#181818] transition-colors ${catTheme.tagBg}`}
                             >
                               {tech}
                             </span>

@@ -15,6 +15,37 @@ import { usePortfolioData } from '../context/PortfolioDataContext';
 
 const BASE_CATEGORIES = ['All', 'Development', 'Visual Design', 'Other'];
 
+export const CATEGORY_COLORS = {
+  Development: {
+    accent: '#2563eb',
+    badgeBg: 'bg-[#2563eb]/10 text-[#2563eb] border-[#2563eb]/30',
+    borderTop: 'border-t-4 border-t-[#2563eb]',
+    tagBg: 'hover:border-[#2563eb] hover:text-[#2563eb]',
+    activeBtn: 'bg-[#2563eb] text-white border-[#2563eb]',
+  },
+  'Visual Design': {
+    accent: '#dc2626',
+    badgeBg: 'bg-[#dc2626]/10 text-[#dc2626] border-[#dc2626]/30',
+    borderTop: 'border-t-4 border-t-[#dc2626]',
+    tagBg: 'hover:border-[#dc2626] hover:text-[#dc2626]',
+    activeBtn: 'bg-[#dc2626] text-white border-[#dc2626]',
+  },
+  Other: {
+    accent: '#7c3aed',
+    badgeBg: 'bg-[#7c3aed]/10 text-[#7c3aed] border-[#7c3aed]/30',
+    borderTop: 'border-t-4 border-t-[#7c3aed]',
+    tagBg: 'hover:border-[#7c3aed] hover:text-[#7c3aed]',
+    activeBtn: 'bg-[#7c3aed] text-white border-[#7c3aed]',
+  },
+  All: {
+    accent: '#181818',
+    badgeBg: 'bg-[#181818] text-[#fcfbf9]',
+    borderTop: 'border-t-4 border-t-[#181818]',
+    tagBg: 'hover:border-[#181818]',
+    activeBtn: 'bg-[#181818] text-[#fcfbf9] border-[#181818]',
+  },
+};
+
 const FEATURED_LIMIT = 4;
 
 /* Editorial Project Photo Frame & Multi-Slide Visual Design Carousel (.webp) */
@@ -407,15 +438,16 @@ export default function Projects() {
                 const isActive = selectedCategory === category;
                 const displayCat =
                   t.projects.categoryLabels?.[category] || category;
+                const catTheme = CATEGORY_COLORS[category] || CATEGORY_COLORS.All;
                 return (
                   <button
                     key={category}
                     type="button"
                     onClick={() => setSelectedCategory(category)}
                     aria-pressed={isActive}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 font-mono font-bold text-[11px] sm:text-xs uppercase tracking-wider border transition-colors duration-200 cursor-pointer ${
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 font-mono font-bold text-[11px] sm:text-xs uppercase tracking-wider border transition-all duration-200 cursor-pointer ${
                       isActive
-                        ? 'bg-[#181818] text-[#fcfbf9] border-[#181818]'
+                        ? catTheme.activeBtn
                         : 'bg-[#fcfbf9] text-[#181818] border-[#d8d2c7] hover:border-[#181818]'
                     }`}
                   >
@@ -442,6 +474,8 @@ export default function Projects() {
                     .map((s) => s.trim())
                     .filter(Boolean);
 
+              const catTheme = CATEGORY_COLORS[project.category] || CATEGORY_COLORS.Other;
+
               return (
                 <motion.article
                   layout
@@ -450,7 +484,7 @@ export default function Projects() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className="border border-[#d8d2c7] bg-[#fcfbf9] hover:border-[#181818] transition-colors duration-200 flex flex-col justify-between min-w-0"
+                  className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:shadow-md hover:border-[#181818] transition-all duration-200 flex flex-col justify-between min-w-0`}
                 >
                   <div>
                     <div className="px-4 sm:px-8 py-4 bg-[#f7f5f0] border-b border-[#d8d2c7] flex flex-wrap items-center justify-between gap-2">
@@ -458,7 +492,7 @@ export default function Projects() {
                         <span className="inline-flex items-center justify-center px-2.5 py-1 bg-[#181818] text-[#fcfbf9] font-mono font-bold text-xs shrink-0">
                           {indexLabel}
                         </span>
-                        <span className="font-mono font-bold text-xs text-[#8c7355] uppercase tracking-wider truncate">
+                        <span className={`inline-flex items-center px-2 py-0.5 border font-mono font-bold text-xs uppercase tracking-wider truncate ${catTheme.badgeBg}`}>
                           {t.projects.categoryLabels?.[project.category] ||
                             project.category}
                         </span>
@@ -498,7 +532,7 @@ export default function Projects() {
                           {techList.map((tech) => (
                             <span
                               key={tech}
-                              className="px-2.5 py-1 bg-[#f7f5f0] border border-[#d8d2c7] font-mono font-bold text-xs text-[#181818]"
+                              className={`px-2.5 py-1 bg-[#f7f5f0] border border-[#d8d2c7] font-mono font-bold text-xs text-[#181818] transition-colors ${catTheme.tagBg}`}
                             >
                               {tech}
                             </span>
