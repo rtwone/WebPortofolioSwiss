@@ -1586,12 +1586,34 @@ export function PortfolioDataProvider({ children }) {
     return 'irfanhariyanto.my.id';
   };
 
-  // Helper to record website clicks separated by domain (same atomic snapshot pattern as recordShortlinkClick)
+  const SITE_CLICK_COOLDOWN_MS = 30 * 60 * 1000; // 30 menit per domain per browser
+  const SHORTLINK_CLICK_COOLDOWN_MS = 10 * 60 * 1000; // 10 menit per shortlink per browser
+
+  const isClickRateLimited = (storageKey, cooldownMs) => {
+    try {
+      const lastHit = Number(localStorage.getItem(storageKey) || 0);
+      const now = Date.now();
+      if (lastHit && now - lastHit < cooldownMs) {
+        return true;
+      }
+      localStorage.setItem(storageKey, String(now));
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  // Helper to record website clicks separated by domain (with anti-spam cooldown + atomic Supabase snapshot)
   const recordSiteClick = useCallback(async (hostnameOverride) => {
     const host =
       hostnameOverride ||
       (typeof window !== 'undefined' ? window.location.hostname : '');
     const domainKey = resolveTrackedDomain(host);
+
+    // Anti-spam: cegah spam F5/refresh dalam 30 menit untuk domain yang sama
+    if (isClickRateLimited(`ih_site_click_${domainKey}`, SITE_CLICK_COOLDOWN_MS)) {
+      return;
+    }
 
     // 1. Update local state & localStorage
     setSiteContent((prev) => {
@@ -1638,9 +1660,17 @@ export function PortfolioDataProvider({ children }) {
     }
   }, []);
 
-  // Helper to record shortlink hit clicks in siteContent
+  // Helper to record shortlink hit clicks in siteContent (with anti-spam cooldown)
   const recordShortlinkClick = useCallback(
     async (shortlinkIdOrSlug) => {
+      const normalizedKey = String(shortlinkIdOrSlug || '').toLowerCase().trim();
+      if (
+        normalizedKey &&
+        isClickRateLimited(`ih_sl_click_${normalizedKey}`, SHORTLINK_CLICK_COOLDOWN_MS)
+      ) {
+        return;
+      }
+
       // 1. Update State & LocalStorage
       let nextContentToSave = null;
       setSiteContent((prev) => {
