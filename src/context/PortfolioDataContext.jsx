@@ -874,6 +874,7 @@ export function PortfolioDataProvider({ children }) {
       ...siteContent,
       ...updatedPartial,
       site_clicks: siteContent.site_clicks || updatedPartial.site_clicks,
+      _click_guard: siteContent._click_guard || updatedPartial._click_guard,
       [sourceKey]: {
         ...(siteContent[sourceKey] || {}),
         ...sourceSections,
@@ -1603,19 +1604,43 @@ export function PortfolioDataProvider({ children }) {
     }
   };
 
-  // Helper to record website clicks separated by domain (with anti-spam cooldown + atomic Supabase snapshot)
+  // Helper to record website clicks via server-side visitor identity (/api/track-click),
+  // with automatic client-side fallback when running local Vite dev server.
   const recordSiteClick = useCallback(async (hostnameOverride) => {
     const host =
       hostnameOverride ||
       (typeof window !== 'undefined' ? window.location.hostname : '');
     const domainKey = resolveTrackedDomain(host);
 
-    // Anti-spam: cegah spam F5/refresh dalam 30 menit untuk domain yang sama
+    // 1. Primary path: Vercel Serverless API (hashes IP + User-Agent server-side)
+    try {
+      const res = await fetch('/api/track-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'site', hostname: host }),
+        keepalive: true,
+      });
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const result = await res.json();
+        if (result?.ok && result?.site_clicks) {
+          setSiteContent((prev) => {
+            const nextContent = { ...prev, site_clicks: result.site_clicks };
+            saveToStorage(STORAGE_KEYS.siteContent, nextContent);
+            return nextContent;
+          });
+          return;
+        }
+      }
+    } catch {
+      // Fall through to client fallback (e.g. local vite dev without serverless API)
+    }
+
+    // 2. Fallback path (local dev): localStorage cooldown + direct Supabase update
     if (isClickRateLimited(`ih_site_click_${domainKey}`, SITE_CLICK_COOLDOWN_MS)) {
       return;
     }
 
-    // 1. Update local state & localStorage
     setSiteContent((prev) => {
       const prevClicks = prev?.site_clicks || {};
       const nextClicks = {
@@ -1629,7 +1654,6 @@ export function PortfolioDataProvider({ children }) {
       return nextContent;
     });
 
-    // 2. Fetch fresh snapshot from Supabase and increment accurately
     if (isSupabaseConfigured && supabase) {
       try {
         const { data } = await supabase
@@ -1660,26 +1684,51 @@ export function PortfolioDataProvider({ children }) {
     }
   }, []);
 
-  // Helper to record shortlink hit clicks in siteContent (with anti-spam cooldown)
+  // Helper to record shortlink hit clicks via server-side visitor identity (/api/track-click),
+  // with automatic client-side fallback when running local Vite dev server.
   const recordShortlinkClick = useCallback(
     async (shortlinkIdOrSlug) => {
       const normalizedKey = String(shortlinkIdOrSlug || '').toLowerCase().trim();
+      if (!normalizedKey) return;
+
+      // 1. Primary path: Vercel Serverless API with keepalive (survives redirect navigation)
+      try {
+        const res = await fetch('/api/track-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'shortlink', target: shortlinkIdOrSlug }),
+          keepalive: true,
+        });
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('application/json')) {
+          const result = await res.json();
+          if (result?.ok && Array.isArray(result?.shortlinks)) {
+            setSiteContent((prev) => {
+              const nextContent = { ...prev, shortlinks: result.shortlinks };
+              saveToStorage(STORAGE_KEYS.siteContent, nextContent);
+              return nextContent;
+            });
+            return;
+          }
+        }
+      } catch {
+        // Fall through to local fallback
+      }
+
+      // 2. Fallback path (local dev)
       if (
-        normalizedKey &&
         isClickRateLimited(`ih_sl_click_${normalizedKey}`, SHORTLINK_CLICK_COOLDOWN_MS)
       ) {
         return;
       }
 
-      // 1. Update State & LocalStorage
-      let nextContentToSave = null;
       setSiteContent((prev) => {
         const list = Array.isArray(prev?.shortlinks) ? prev.shortlinks : [];
         let updated = false;
         const nextList = list.map((item) => {
           if (
             item.id === shortlinkIdOrSlug ||
-            (item.slug || '').toLowerCase() === String(shortlinkIdOrSlug).toLowerCase()
+            (item.slug || '').toLowerCase() === normalizedKey
           ) {
             updated = true;
             return { ...item, clicks: (item.clicks || 0) + 1 };
@@ -1688,12 +1737,10 @@ export function PortfolioDataProvider({ children }) {
         });
         if (!updated) return prev;
         const nextContent = { ...prev, shortlinks: nextList };
-        nextContentToSave = nextContent;
         saveToStorage(STORAGE_KEYS.siteContent, nextContent);
         return nextContent;
       });
 
-      // 2. Fetch fresh snapshot from Supabase and increment accurately
       if (isSupabaseConfigured && supabase) {
         try {
           const { data } = await supabase
@@ -1709,7 +1756,7 @@ export function PortfolioDataProvider({ children }) {
             const updatedDbList = dbList.map((item) => {
               if (
                 item.id === shortlinkIdOrSlug ||
-                (item.slug || '').toLowerCase() === String(shortlinkIdOrSlug).toLowerCase()
+                (item.slug || '').toLowerCase() === normalizedKey
               ) {
                 return { ...item, clicks: (item.clicks || 0) + 1 };
               }
