@@ -873,6 +873,7 @@ export function PortfolioDataProvider({ children }) {
     const nextContent = {
       ...siteContent,
       ...updatedPartial,
+      site_clicks: siteContent.site_clicks || updatedPartial.site_clicks,
       [sourceKey]: {
         ...(siteContent[sourceKey] || {}),
         ...sourceSections,
@@ -1573,6 +1574,70 @@ export function PortfolioDataProvider({ children }) {
 
   const t = UI_DICTIONARY[language] || UI_DICTIONARY.id;
 
+  // Helper to resolve visitor hostname into tracked domain bucket
+  const resolveTrackedDomain = (hostname) => {
+    const cleanHost = String(hostname || '')
+      .toLowerCase()
+      .trim()
+      .replace(/^www\./, '');
+    if (cleanHost === 'irfan.sang.ceo') {
+      return 'irfan.sang.ceo';
+    }
+    return 'irfanhariyanto.my.id';
+  };
+
+  // Helper to record website clicks separated by domain (same atomic snapshot pattern as recordShortlinkClick)
+  const recordSiteClick = useCallback(async (hostnameOverride) => {
+    const host =
+      hostnameOverride ||
+      (typeof window !== 'undefined' ? window.location.hostname : '');
+    const domainKey = resolveTrackedDomain(host);
+
+    // 1. Update local state & localStorage
+    setSiteContent((prev) => {
+      const prevClicks = prev?.site_clicks || {};
+      const nextClicks = {
+        'irfan.sang.ceo': Number(prevClicks['irfan.sang.ceo']) || 0,
+        'irfanhariyanto.my.id': Number(prevClicks['irfanhariyanto.my.id']) || 0,
+      };
+      nextClicks[domainKey] = (nextClicks[domainKey] || 0) + 1;
+
+      const nextContent = { ...prev, site_clicks: nextClicks };
+      saveToStorage(STORAGE_KEYS.siteContent, nextContent);
+      return nextContent;
+    });
+
+    // 2. Fetch fresh snapshot from Supabase and increment accurately
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data } = await supabase
+          .from('site_settings')
+          .select('content')
+          .eq('id', 'main')
+          .maybeSingle();
+
+        if (data?.content) {
+          const dbClicks = data.content.site_clicks || {};
+          const nextDbClicks = {
+            'irfan.sang.ceo': Number(dbClicks['irfan.sang.ceo']) || 0,
+            'irfanhariyanto.my.id': Number(dbClicks['irfanhariyanto.my.id']) || 0,
+          };
+          nextDbClicks[domainKey] = (nextDbClicks[domainKey] || 0) + 1;
+
+          await supabase
+            .from('site_settings')
+            .update({
+              content: { ...data.content, site_clicks: nextDbClicks },
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', 'main');
+        }
+      } catch {
+        // ignore network errors silently
+      }
+    }
+  }, []);
+
   // Helper to record shortlink hit clicks in siteContent
   const recordShortlinkClick = useCallback(
     async (shortlinkIdOrSlug) => {
@@ -1652,6 +1717,7 @@ export function PortfolioDataProvider({ children }) {
         rawSiteContent: siteContent,
         buildLocalizedSiteContent,
         recordShortlinkClick,
+        recordSiteClick,
         projects: localizedProjects,
         rawProjects: projects,
         experiences: localizedExperiences,

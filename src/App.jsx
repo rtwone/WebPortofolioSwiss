@@ -1,6 +1,6 @@
-import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
-import { PortfolioDataProvider } from './context/PortfolioDataContext';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioDataContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -16,6 +16,31 @@ import NotFoundPage from './pages/NotFoundPage';
 import DynamicShortlinkRedirect from './pages/DynamicShortlinkRedirect';
 
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+/**
+ * Mencatat Total Klik kunjungan halaman publik tepat 1 kali per load,
+ * dipisah berdasarkan domain (irfan.sang.ceo vs irfanhariyanto.my.id).
+ * Mengabaikan /admin dan route shortlink agar hitungan tetap akurat.
+ */
+function SiteVisitTracker() {
+  const { pathname } = useLocation();
+  const { recordSiteClick } = usePortfolioData();
+  const hasRecordedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasRecordedRef.current) return;
+    // Hanya catat kunjungan halaman publik utama (/ dan /projects)
+    const isPublicPortfolioRoute = pathname === '/' || pathname === '/projects';
+    if (!isPublicPortfolioRoute) return;
+
+    hasRecordedRef.current = true;
+    if (typeof recordSiteClick === 'function') {
+      recordSiteClick(window.location.hostname);
+    }
+  }, [pathname, recordSiteClick]);
+
+  return null;
+}
 
 /**
  * Global Keyboard Shortcut: CTRL + ALT + A (atau CMD + OPTION + A di macOS)
@@ -91,6 +116,7 @@ export default function App() {
       <PortfolioDataProvider>
         <BrowserRouter>
           <SmoothScroll />
+          <SiteVisitTracker />
           <AdminShortcutListener />
           <Routes>
             <Route path="/" element={<PublicPortfolioPage />} />

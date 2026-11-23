@@ -2356,6 +2356,57 @@ export default function AdminDashboard() {
               <span>Reset / Seed Default Data</span>
             </button>
           </div>
+
+          {/* Total Klik Website per Domain */}
+          {(() => {
+            const siteClicks = rawSiteContent?.site_clicks || {};
+            const ceoClicks = Number(siteClicks['irfan.sang.ceo']) || 0;
+            const mainClicks = Number(siteClicks['irfanhariyanto.my.id']) || 0;
+            const totalSiteClicks = ceoClicks + mainClicks;
+            return (
+              <div className="border border-[#333333] bg-[#1f1f1f] p-4 sm:p-5 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-mono font-bold text-[10px] sm:text-xs text-[#8c7355] uppercase tracking-wider flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 shrink-0" />
+                    <span>TOTAL KLIK WEBSITE</span>
+                  </div>
+                  <span className="px-2 py-0.5 bg-[#141414] border border-[#8c7355]/60 font-mono font-bold text-xs text-[#fcfbf9]">
+                    {totalSiteClicks}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="p-2.5 sm:p-3 bg-[#141414] border border-[#2c2c2c] flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-mono font-bold text-xs text-[#fcfbf9] truncate">
+                        irfan.sang.ceo
+                      </div>
+                      <div className="font-mono text-[10px] text-[#8c857b]">
+                        Domain Khusus
+                      </div>
+                    </div>
+                    <div className="font-mono font-bold text-base sm:text-lg text-[#8c7355] shrink-0">
+                      {ceoClicks}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 sm:p-3 bg-[#141414] border border-[#2c2c2c] flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-mono font-bold text-xs text-[#fcfbf9] truncate">
+                        irfanhariyanto.my.id
+                      </div>
+                      <div className="font-mono text-[10px] text-[#8c857b]">
+                        Domain Utama + lainnya
+                      </div>
+                    </div>
+                    <div className="font-mono font-bold text-base sm:text-lg text-[#16a34a] shrink-0">
+                      {mainClicks}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </aside>
 
         {/* Right Main Content Area (9 Cols) */}
