@@ -34,6 +34,8 @@ import {
   Link2,
   Copy,
   ExternalLink,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import {
   supabase,
@@ -147,6 +149,7 @@ export default function AdminDashboard() {
     createProject,
     updateProject,
     deleteProject,
+    moveProjectToPosition,
     createExperience,
     updateExperience,
     deleteExperience,
@@ -810,6 +813,15 @@ export default function AdminDashboard() {
       gallery_items: [],
     });
     setProjectModalOpen(true);
+  };
+
+  const handleMoveProject = async (projectId, targetPos) => {
+    try {
+      await moveProjectToPosition(projectId, targetPos);
+      showToast(`Urutan projek dipindahkan ke posisi #${targetPos}`);
+    } catch (err) {
+      showToast(`Gagal mengubah urutan: ${err.message}`, 'error');
+    }
   };
 
   const openEditProjectModal = (proj) => {
@@ -3265,9 +3277,49 @@ export default function AdminDashboard() {
 
                         <div className="space-y-2 flex-1">
                           <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="px-2 py-0.5 bg-[#141414] border border-[#3a3835] font-mono font-bold text-xs text-[#8c7355]">
-                              #{String(idx + 1).padStart(2, '0')}
-                            </span>
+                            <div className="inline-flex items-center border border-[#3a3835] bg-[#141414]">
+                              <label
+                                htmlFor={`proj-order-${proj.id}`}
+                                className="px-2 py-0.5 font-mono font-bold text-[10px] text-[#8c7355] uppercase border-r border-[#3a3835]"
+                              >
+                                Urutan
+                              </label>
+                              <select
+                                id={`proj-order-${proj.id}`}
+                                value={idx + 1}
+                                onChange={(e) =>
+                                  handleMoveProject(proj.id, Number(e.target.value))
+                                }
+                                title="Pilih urutan tampil projek ini"
+                                className="px-2 py-0.5 bg-[#141414] font-mono font-bold text-xs text-[#fcfbf9] outline-none cursor-pointer"
+                              >
+                                {projects.map((_, optIdx) => (
+                                  <option key={optIdx + 1} value={optIdx + 1}>
+                                    #{String(optIdx + 1).padStart(2, '0')}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveProject(proj.id, idx)}
+                                title="Naikkan urutan"
+                                aria-label="Naikkan urutan projek"
+                                className="px-1.5 py-0.5 border-l border-[#3a3835] text-[#d8d2c7] hover:text-[#fcfbf9] hover:bg-[#262626] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              >
+                                <ArrowUp className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === projects.length - 1}
+                                onClick={() => handleMoveProject(proj.id, idx + 2)}
+                                title="Turunkan urutan"
+                                aria-label="Turunkan urutan projek"
+                                className="px-1.5 py-0.5 border-l border-[#3a3835] text-[#d8d2c7] hover:text-[#fcfbf9] hover:bg-[#262626] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              >
+                                <ArrowDown className="w-3 h-3" />
+                              </button>
+                            </div>
                             <span className="px-2.5 py-0.5 bg-[#8c7355]/20 border border-[#8c7355] font-mono font-bold text-xs text-[#fcfbf9]">
                               {proj.category}
                             </span>

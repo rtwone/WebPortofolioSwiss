@@ -587,10 +587,26 @@ export function PortfolioDataProvider({ children }) {
     linkCanonical.setAttribute('href', canonical || window.location.origin);
   }, [activeSiteContent?.seo]);
 
-  // Compute localized projects for current language (supports custom dynamic translations + gallery_items in siteContent.project_translations)
+  // Compute localized projects for current language (supports custom dynamic translations, gallery_items, and custom project_order)
   const localizedProjects = useMemo(() => {
     const customMap = siteContent?.project_translations || {};
-    return projects.map((proj) => {
+    const customOrder = Array.isArray(siteContent?.project_order)
+      ? siteContent.project_order
+      : [];
+    const orderIndexMap = new Map(customOrder.map((id, i) => [id, i]));
+
+    const sortedRaw = [...projects].sort((a, b) => {
+      const idxA = orderIndexMap.has(a.id)
+        ? orderIndexMap.get(a.id)
+        : Number.MAX_SAFE_INTEGER;
+      const idxB = orderIndexMap.has(b.id)
+        ? orderIndexMap.get(b.id)
+        : Number.MAX_SAFE_INTEGER;
+      if (idxA !== idxB) return idxA - idxB;
+      return 0;
+    });
+
+    return sortedRaw.map((proj) => {
       const customEntry = customMap[proj.id];
       const fallbackHimatikaGallery =
         proj.category === 'Visual Design' &&
@@ -651,7 +667,7 @@ export function PortfolioDataProvider({ children }) {
         gallery_items: localizedGallery,
       };
     });
-  }, [language, projects, siteContent?.project_translations]);
+  }, [language, projects, siteContent?.project_translations, siteContent?.project_order]);
 
   // Helper to translate period text between ID and EN dynamically
   const localizePeriodString = (rawPeriod, lang) => {
@@ -1098,6 +1114,44 @@ export function PortfolioDataProvider({ children }) {
       saveToStorage(STORAGE_KEYS.projects, next);
       return next;
     });
+  };
+
+  // Reorder projects to a specific 1-based position and persist in site_settings.content.project_order
+  const moveProjectToPosition = async (projectId, targetPosition1Based) => {
+    const currentOrderedIds = localizedProjects.map((p) => p.id);
+    const fromIndex = currentOrderedIds.indexOf(projectId);
+    if (fromIndex === -1) return currentOrderedIds;
+
+    const clampedToIndex = Math.max(
+      0,
+      Math.min(currentOrderedIds.length - 1, Number(targetPosition1Based) - 1)
+    );
+    if (fromIndex === clampedToIndex) return currentOrderedIds;
+
+    const nextOrder = [...currentOrderedIds];
+    const [moved] = nextOrder.splice(fromIndex, 1);
+    nextOrder.splice(clampedToIndex, 0, moved);
+
+    const nextContent = {
+      ...siteContent,
+      project_order: nextOrder,
+    };
+    setSiteContent(nextContent);
+    saveToStorage(STORAGE_KEYS.siteContent, nextContent);
+
+    if (isSupabaseConfigured && supabase && dbMode === 'supabase') {
+      const { error } = await supabase.from('site_settings').upsert(
+        {
+          id: 'main',
+          content: nextContent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      );
+      if (error) throw error;
+    }
+
+    return nextOrder;
   };
 
   // ==========================================================================
@@ -1613,6 +1667,7 @@ export function PortfolioDataProvider({ children }) {
         createProject,
         updateProject,
         deleteProject,
+        moveProjectToPosition,
         createExperience,
         updateExperience,
         deleteExperience,
