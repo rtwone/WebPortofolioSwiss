@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Command } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
-import { openCommandPalette } from '../components/CommandPalette';
 import Footer from '../components/Footer';
 
 export default function NotFoundPage() {
@@ -67,15 +66,6 @@ export default function NotFoundPage() {
                       {isId ? 'Kembali ke Beranda' : 'Back to Safety'}
                     </span>
                   </Link>
-
-                  <button
-                    type="button"
-                    onClick={openCommandPalette}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#fcfbf9] text-[#181818] border-2 border-[#181818] hover:bg-[#181818] hover:text-[#fcfbf9] font-mono font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                  >
-                    <Command className="w-4 h-4 text-[#8c7355] shrink-0" aria-hidden="true" />
-                    <span>Open Command Palette (⌘K)</span>
-                  </button>
                 </div>
               </div>
             </div>

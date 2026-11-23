@@ -9,7 +9,6 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import CommandPalette from './components/CommandPalette';
 import SmoothScroll from './components/SmoothScroll';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProjectsArchivePage from './pages/ProjectsArchivePage';
@@ -93,7 +92,6 @@ export default function App() {
         <BrowserRouter>
           <SmoothScroll />
           <AdminShortcutListener />
-          <CommandPalette />
           <Routes>
             <Route path="/" element={<PublicPortfolioPage />} />
             <Route path="/projects" element={<ProjectsArchivePage />} />

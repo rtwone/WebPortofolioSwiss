@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowUpRight, Sun, Moon, Command } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Sun, Moon } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
-import { openCommandPalette } from './CommandPalette';
 
 export default function Navbar() {
   const { siteContent, language, setLanguage, theme, toggleTheme, t } =
@@ -141,18 +140,6 @@ export default function Navbar() {
 
             <div className="h-5 w-[1px] bg-[#d8d2c7]" aria-hidden="true" />
 
-            {/* Command Palette Trigger (⌘K / Ctrl+K) */}
-            <button
-              type="button"
-              onClick={openCommandPalette}
-              aria-label="Open Command Palette (Ctrl+K or Cmd+K)"
-              title="Command Palette (Ctrl+K / ⌘K)"
-              className="inline-flex items-center gap-1.5 px-2.5 h-9 border border-[#181818] bg-[#fcfbf9] text-[#181818] hover:bg-[#181818] hover:text-[#fcfbf9] font-mono font-bold text-xs transition-colors cursor-pointer"
-            >
-              <Command className="w-3.5 h-3.5 text-[#8c7355]" aria-hidden="true" />
-              <span>⌘K</span>
-            </button>
-
             {/* Bilingual Toggle: ID | EN */}
             <div
               role="group"
@@ -209,17 +196,8 @@ export default function Navbar() {
             </button>
           </nav>
 
-          {/* Right (Mobile): Command Palette + Language Switcher + Theme Switcher + Hamburger */}
+          {/* Right (Mobile): Language Switcher + Theme Switcher + Hamburger */}
           <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
-            <button
-              type="button"
-              onClick={openCommandPalette}
-              aria-label="Open Command Palette"
-              title="Command Palette (⌘K)"
-              className="inline-flex items-center justify-center px-2.5 min-h-[38px] border border-[#181818] bg-[#fcfbf9] text-[#181818] font-mono font-bold text-xs cursor-pointer"
-            >
-              ⌘K
-            </button>
             <div
               role="group"
               aria-label="Language Switcher"
