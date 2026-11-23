@@ -9,6 +9,7 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
+import RevealWords from './RevealWords';
 
 const METRIC_ICONS = [Layers, Code2, Terminal, Sparkles];
 
@@ -50,9 +51,12 @@ export default function About() {
             id="about-heading"
             className="font-display font-bold text-2xl sm:text-3xl md:text-5xl text-[#181818] tracking-tight leading-tight md:leading-[1.12]"
           >
-            {about.headingMain || 'Bridging Logical Architecture'}{' '}
+            <RevealWords text={about.headingMain || 'Bridging Logical Architecture'} />{' '}
             <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-4xl md:text-6xl">
-              {about.headingAccent || 'with Visual Aesthetics'}
+              <RevealWords
+                text={about.headingAccent || 'with Visual Aesthetics'}
+                delay={0.18}
+              />
             </span>
           </h2>
         </motion.div>
@@ -141,9 +145,14 @@ export default function About() {
               const IconComponent = METRIC_ICONS[idx % METRIC_ICONS.length];
               const theme = METRIC_THEMES[idx % METRIC_THEMES.length];
               return (
-                <div
+                <motion.div
                   key={metric.index || idx}
-                  className={`border border-[#d8d2c7] ${theme.border} bg-[#fcfbf9] p-5 sm:p-6 hover:shadow-sm transition-all duration-200`}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.45, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ y: -4, transition: { duration: 0.2, ease: 'easeOut' } }}
+                  className={`border border-[#d8d2c7] ${theme.border} bg-[#fcfbf9] p-5 sm:p-6 hover:shadow-md transition-shadow duration-200`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className={`font-mono font-bold text-xs sm:text-sm tracking-wider ${theme.tag}`}>
@@ -168,7 +177,7 @@ export default function About() {
                   <p className="mt-1.5 font-sans font-medium text-xs sm:text-sm text-[#3a3835] leading-relaxed">
                     {metric.detail}
                   </p>
-                </div>
+                </motion.div>
               );
             })}
           </motion.div>

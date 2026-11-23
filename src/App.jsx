@@ -10,6 +10,7 @@ import Experience from './components/Experience';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CommandPalette from './components/CommandPalette';
+import SmoothScroll from './components/SmoothScroll';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProjectsArchivePage from './pages/ProjectsArchivePage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -90,6 +91,7 @@ export default function App() {
     <ErrorBoundary>
       <PortfolioDataProvider>
         <BrowserRouter>
+          <SmoothScroll />
           <AdminShortcutListener />
           <CommandPalette />
           <Routes>

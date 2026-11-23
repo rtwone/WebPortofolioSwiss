@@ -62,10 +62,14 @@ export default function Navbar() {
       const headerOffset = 80;
       const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
       const finalTop = Math.max(0, Math.round(top));
-      try {
-        window.scrollTo({ top: finalTop, behavior: 'smooth' });
-      } catch {
-        window.scrollTo(0, finalTop);
+      if (window.__lenis) {
+        window.__lenis.scrollTo(finalTop);
+      } else {
+        try {
+          window.scrollTo({ top: finalTop, behavior: 'smooth' });
+        } catch {
+          window.scrollTo(0, finalTop);
+        }
       }
       // Fallback: jika scroll belum bergerak (dibatalkan browser), lompat langsung.
       const startY = window.pageYOffset;

@@ -9,6 +9,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
+import RevealWords from './RevealWords';
 
 const PILL_ICONS = [Code2, Layers, Terminal, Sparkles];
 
@@ -54,7 +55,11 @@ export default function Hero() {
     e.preventDefault();
     const element = document.querySelector(selector);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(element, { offset: -80 });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -125,7 +130,7 @@ export default function Hero() {
 
                 {/* Line 1: Playfair Display ExtraBold (Mobile-First Responsive Scale) */}
                 <h1 className="font-display font-extrabold text-3xl sm:text-5xl md:text-6xl lg:text-[5.5rem] tracking-tight text-[#181818] leading-tight lg:leading-[1.04]">
-                  {hero.name || 'Irfan Hariyanto'}
+                  <RevealWords text={hero.name || 'Irfan Hariyanto'} immediate stagger={0.08} />
                 </h1>
 
                 {/* Line 2: Cormorant Garamond Bold Italic dengan Animasi Kedip Halus (Cross-fade) */}
@@ -188,9 +193,13 @@ export default function Hero() {
                   const IconComponent = PILL_ICONS[idx % PILL_ICONS.length];
                   const theme = disciplineThemes[idx % disciplineThemes.length];
                   return (
-                    <div
+                    <motion.div
                       key={item.code || idx}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 bg-[#fcfbf9] border border-[#d8d2c7] ${theme.border} hover:shadow-sm transition-all min-w-0`}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.18 + idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                      whileHover={{ y: -3, transition: { duration: 0.2, ease: 'easeOut' } }}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 bg-[#fcfbf9] border border-[#d8d2c7] ${theme.border} hover:shadow-md transition-shadow min-w-0`}
                     >
                       <div className={`p-1 rounded ${theme.iconBg} shrink-0`}>
                         <IconComponent
@@ -204,7 +213,7 @@ export default function Hero() {
                       <span className="font-sans font-semibold text-xs sm:text-[13px] text-[#181818] leading-tight break-words">
                         {item.label}
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>

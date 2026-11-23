@@ -49,6 +49,20 @@
     transition: background-color 0.25s ease, color 0.25s ease;
   }
 
+  /* Lenis Smooth Scroll compatibility */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);

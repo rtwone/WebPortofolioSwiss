@@ -14,6 +14,7 @@ import {
 import { usePortfolioData } from '../context/PortfolioDataContext';
 import { ProjectPhotoFrame, CATEGORY_COLORS } from '../components/Projects';
 import Footer from '../components/Footer';
+import RevealWords from '../components/RevealWords';
 
 const BASE_CATEGORIES = ['All', 'Development', 'Visual Design', 'Other'];
 
@@ -144,9 +145,13 @@ export default function ProjectsArchivePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-end">
               <div className="lg:col-span-8">
                 <h1 className="font-display font-bold text-2xl sm:text-4xl md:text-6xl text-[#181818] tracking-tight leading-tight md:leading-[1.08]">
-                  {t.projects.archiveHeadingMain}{' '}
+                  <RevealWords text={t.projects.archiveHeadingMain} immediate />{' '}
                   <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-5xl md:text-7xl block sm:inline">
-                    {t.projects.archiveHeadingAccent}
+                    <RevealWords
+                      text={t.projects.archiveHeadingAccent}
+                      immediate
+                      delay={0.16}
+                    />
                   </span>
                 </h1>
               </div>
@@ -263,11 +268,17 @@ export default function ProjectsArchivePage() {
                     <motion.article
                       layout
                       key={project.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.15 }}
                       exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.35, ease: 'easeOut' }}
-                      className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-md transition-all duration-200 flex flex-col justify-between min-w-0`}
+                      transition={{
+                        duration: 0.45,
+                        delay: (idx % 2) * 0.08,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      whileHover={{ y: -5, transition: { duration: 0.22, ease: 'easeOut' } }}
+                      className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-lg transition-shadow duration-200 flex flex-col justify-between min-w-0`}
                     >
                       <div>
                         <div className="px-4 sm:px-8 py-4 bg-[#f7f5f0] border-b border-[#d8d2c7] flex flex-wrap items-center justify-between gap-2">

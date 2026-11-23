@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, ArrowUpRight, Send } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
 import { sendEmailViaResend } from '../lib/resend';
+import RevealWords from './RevealWords';
 const SUBMIT_COOLDOWN_KEY = 'portfolio_contact_last_submit';
 const SUBMIT_COOLDOWN_MS = 60_000;
 const MIN_FILL_TIME_MS = 2_500;
@@ -239,9 +240,12 @@ export default function Contact() {
             id="contact-heading"
             className="font-display font-bold text-2xl sm:text-3xl md:text-5xl text-[#181818] tracking-tight leading-tight md:leading-[1.12]"
           >
-            {contactConfig.headingMain || "Let's Build Something"}{' '}
+            <RevealWords text={contactConfig.headingMain || "Let's Build Something"} />{' '}
             <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-4xl md:text-6xl">
-              {contactConfig.headingAccent || 'Meaningful Together'}
+              <RevealWords
+                text={contactConfig.headingAccent || 'Meaningful Together'}
+                delay={0.18}
+              />
             </span>
           </h2>
         </motion.div>

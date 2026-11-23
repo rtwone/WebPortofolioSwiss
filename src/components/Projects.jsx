@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
+import RevealWords from './RevealWords';
 
 const BASE_CATEGORIES = ['All', 'Development', 'Visual Design', 'Other'];
 
@@ -422,9 +423,12 @@ export default function Projects() {
               id="projects-heading"
               className="font-display font-bold text-2xl sm:text-3xl md:text-5xl text-[#181818] tracking-tight leading-tight md:leading-[1.12]"
             >
-              {projectsSection.headingMain || 'Selected Works &'}{' '}
+              <RevealWords text={projectsSection.headingMain || 'Selected Works &'} />{' '}
               <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-4xl md:text-6xl">
-                {projectsSection.headingAccent || 'Digital Products'}
+                <RevealWords
+                  text={projectsSection.headingAccent || 'Digital Products'}
+                  delay={0.16}
+                />
               </span>
             </h2>
 
@@ -480,11 +484,17 @@ export default function Projects() {
                 <motion.article
                   layout
                   key={project.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
                   exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:shadow-md hover:border-[#181818] transition-all duration-200 flex flex-col justify-between min-w-0`}
+                  transition={{
+                    duration: 0.5,
+                    delay: (idx % 2) * 0.08,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  whileHover={{ y: -5, transition: { duration: 0.22, ease: 'easeOut' } }}
+                  className={`border border-[#d8d2c7] ${catTheme.borderTop} bg-[#fcfbf9] hover:shadow-lg hover:border-[#181818] transition-shadow duration-200 flex flex-col justify-between min-w-0`}
                 >
                   <div>
                     <div className="px-4 sm:px-8 py-4 bg-[#f7f5f0] border-b border-[#d8d2c7] flex flex-wrap items-center justify-between gap-2">

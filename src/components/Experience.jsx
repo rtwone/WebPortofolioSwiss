@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, GraduationCap, Layers, Cpu, Sparkles, ChevronDown } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
+import RevealWords from './RevealWords';
 
 const CORE_COMPETENCIES = [
   {
@@ -227,9 +228,12 @@ export default function Experience() {
             id="experience-heading"
             className="font-display font-bold text-2xl sm:text-3xl md:text-5xl text-[#181818] tracking-tight leading-tight md:leading-[1.12]"
           >
-            {expSection.headingMain || 'Career Journey &'}{' '}
+            <RevealWords text={expSection.headingMain || 'Career Journey &'} />{' '}
             <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-4xl md:text-6xl">
-              {expSection.headingAccent || 'Academic Background'}
+              <RevealWords
+                text={expSection.headingAccent || 'Academic Background'}
+                delay={0.16}
+              />
             </span>
           </h2>
         </motion.div>
@@ -611,9 +615,14 @@ export default function Experience() {
                   ];
                   const cTheme = compThemes[idx % compThemes.length];
                   return (
-                    <div
+                    <motion.div
                       key={comp.code || idx}
-                      className={`p-3.5 sm:p-4 bg-[#f7f5f0] border border-[#d8d2c7] ${cTheme.border} hover:border-[#181818] hover:shadow-sm transition-all`}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.45, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      whileHover={{ x: 4, transition: { duration: 0.18, ease: 'easeOut' } }}
+                      className={`p-3.5 sm:p-4 bg-[#f7f5f0] border border-[#d8d2c7] ${cTheme.border} hover:border-[#181818] hover:shadow-sm transition-shadow`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span className={`font-mono font-bold text-xs tracking-wider ${cTheme.tag}`}>
@@ -632,7 +641,7 @@ export default function Experience() {
                       <p className="mt-1 font-sans font-medium text-xs sm:text-sm text-[#3a3835] leading-relaxed">
                         {comp.detail}
                       </p>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>

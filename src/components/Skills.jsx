@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Palette, Terminal, Sparkles } from 'lucide-react';
 import { usePortfolioData } from '../context/PortfolioDataContext';
+import RevealWords from './RevealWords';
 
 const CATEGORY_METADATA = {
   'Creative & Visual Arts': {
@@ -121,9 +122,12 @@ export default function Skills() {
               id="skills-heading"
               className="font-display font-bold text-2xl sm:text-3xl md:text-5xl text-[#181818] tracking-tight leading-tight md:leading-[1.12]"
             >
-              {skillsSection.headingMain || 'Technical Arsenal &'}{' '}
+              <RevealWords text={skillsSection.headingMain || 'Technical Arsenal &'} />{' '}
               <span className="font-calligraphic font-bold italic text-[#8c7355] text-3xl sm:text-4xl md:text-6xl">
-                {skillsSection.headingAccent || 'Creative Tools'}
+                <RevealWords
+                  text={skillsSection.headingAccent || 'Creative Tools'}
+                  delay={0.16}
+                />
               </span>
             </h2>
 
@@ -140,11 +144,12 @@ export default function Skills() {
             return (
               <motion.article
                 key={category.title}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: 'easeOut' }}
-                className={`border border-[#d8d2c7] ${category.borderTop || 'border-t-4 border-t-[#181818]'} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-md transition-all duration-200 flex flex-col justify-between min-w-0`}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -5, transition: { duration: 0.22, ease: 'easeOut' } }}
+                className={`border border-[#d8d2c7] ${category.borderTop || 'border-t-4 border-t-[#181818]'} bg-[#fcfbf9] hover:border-[#181818] hover:shadow-lg transition-shadow duration-200 flex flex-col justify-between min-w-0`}
               >
                 {/* Top Card Header & Description */}
                 <div className="p-4 sm:p-8">
