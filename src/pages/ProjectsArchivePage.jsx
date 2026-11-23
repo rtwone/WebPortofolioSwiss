@@ -75,13 +75,13 @@ export default function ProjectsArchivePage() {
             <div
               role="group"
               aria-label="Language switcher"
-              className="inline-flex items-center border border-[#d8d2c7] bg-[#fcfbf9]"
+              className="inline-flex items-stretch h-9 border border-[#d8d2c7] bg-[#fcfbf9]"
             >
               <button
                 type="button"
                 onClick={() => setLanguage('id')}
                 aria-pressed={language === 'id'}
-                className={`px-2.5 py-2 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
                   language === 'id'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#5c5852] hover:text-[#181818]'
@@ -93,7 +93,7 @@ export default function ProjectsArchivePage() {
                 type="button"
                 onClick={() => setLanguage('en')}
                 aria-pressed={language === 'en'}
-                className={`px-2.5 py-2 font-mono font-bold text-xs uppercase border-l border-[#d8d2c7] transition-colors cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase border-l border-[#d8d2c7] transition-colors cursor-pointer ${
                   language === 'en'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#5c5852] hover:text-[#181818]'

@@ -144,13 +144,13 @@ export default function Navbar() {
             <div
               role="group"
               aria-label="Language Switcher"
-              className="inline-flex items-center border border-[#181818] bg-[#fcfbf9]"
+              className="inline-flex items-stretch h-9 border border-[#181818] bg-[#fcfbf9]"
             >
               <button
                 type="button"
                 onClick={() => setLanguage('id')}
                 aria-pressed={language === 'id'}
-                className={`px-2.5 py-1.5 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
                   language === 'id'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#181818] hover:bg-[#f7f5f0]'
@@ -162,7 +162,7 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setLanguage('en')}
                 aria-pressed={language === 'en'}
-                className={`px-2.5 py-1.5 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase transition-colors cursor-pointer ${
                   language === 'en'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#181818] hover:bg-[#f7f5f0]'
@@ -201,12 +201,12 @@ export default function Navbar() {
             <div
               role="group"
               aria-label="Language Switcher"
-              className="inline-flex items-center border border-[#181818] bg-[#fcfbf9]"
+              className="inline-flex items-stretch h-10 border border-[#181818] bg-[#fcfbf9]"
             >
               <button
                 type="button"
                 onClick={() => setLanguage('id')}
-                className={`px-2.5 min-h-[38px] font-mono font-bold text-xs uppercase cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase cursor-pointer ${
                   language === 'id'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#181818]'
@@ -217,7 +217,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setLanguage('en')}
-                className={`px-2.5 min-h-[38px] font-mono font-bold text-xs uppercase cursor-pointer ${
+                className={`inline-flex items-center justify-center h-full px-2.5 font-mono font-bold text-xs uppercase cursor-pointer ${
                   language === 'en'
                     ? 'bg-[#181818] text-[#fcfbf9]'
                     : 'text-[#181818]'
