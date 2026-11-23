@@ -1,9 +1,10 @@
-import React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 
 /**
  * Word-by-word scroll reveal powered by Motion (framer-motion).
- * Splits text into individual words and masks each word upward as it enters the viewport.
+ * Observes the stationary outer wrapper (not the clipped/translated word) so
+ * IntersectionObserver always triggers reliably across all viewports.
  */
 export default function RevealWords({
   text = '',
@@ -12,7 +13,10 @@ export default function RevealWords({
   stagger = 0.055,
   immediate = false,
 }) {
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.1 });
   const shouldReduceMotion = useReducedMotion();
+
   const words = String(text || '')
     .trim()
     .split(/\s+/)
@@ -24,25 +28,27 @@ export default function RevealWords({
     return <span className={className}>{text}</span>;
   }
 
+  const shouldAnimate = immediate || isInView;
+
   return (
     <span className={className}>
       {words.map((word, idx) => (
         <span
-          key={`${word}-${idx}`}
-          className="inline-block overflow-hidden align-bottom py-[0.06em] -my-[0.06em]"
+          key={idx}
+          ref={idx === 0 ? containerRef : undefined}
+          className="inline-block overflow-hidden align-bottom py-[0.08em] -my-[0.08em]"
         >
           <motion.span
             className="inline-block will-change-transform"
-            initial={{ y: '105%', opacity: 0 }}
-            {...(immediate
-              ? { animate: { y: '0%', opacity: 1 } }
-              : {
-                  whileInView: { y: '0%', opacity: 1 },
-                  viewport: { once: true, amount: 0.35 },
-                })}
+            initial={{ y: '100%', opacity: 0 }}
+            animate={
+              shouldAnimate
+                ? { y: '0%', opacity: 1 }
+                : { y: '100%', opacity: 0 }
+            }
             transition={{
               duration: 0.55,
-              delay: delay + idx * stagger,
+              delay: shouldAnimate ? delay + idx * stagger : 0,
               ease: [0.22, 1, 0.36, 1],
             }}
           >
